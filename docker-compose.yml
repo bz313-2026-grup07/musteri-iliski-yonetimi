@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16
+    container_name: rosebud-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: rosebud
+      POSTGRES_PASSWORD: rosebud
+      POSTGRES_DB: rosebud
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./server/src/db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rosebud"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
