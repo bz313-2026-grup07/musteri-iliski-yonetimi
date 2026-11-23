@@ -53,7 +53,15 @@ Tarayıcı (React) ──/api/*──▶ Express ──▶ requireAuth ──▶
 - Yeni liste sayfası için `pages/Customers.jsx`, form için `components/CustomerForm.jsx` dosyasını kopyalayın.
 - Rol kontrolü için `const { hasRole } = useAuth()` kullanın.
 - **Erişilebilirlik (Fizibilite 5.4):** Her input'un bir `<label htmlFor>` etiketi olsun. Tıklanabilir her şey `<button>` veya `<a>` olsun; tıklanan `<div>` kullanmayın. Klavyeyle gezilebilirliği ve %200 zoom'da bozulmadığını kontrol edin.
-- Menüye yeni sayfa eklemek için `components/Layout.jsx` içindeki `NAV` dizisini, rota için `App.jsx` dosyasını güncelleyin.
+- **Görünüm:** Eski PRACRM platformunun kimliği korunarak iyileştirildi: gruplu koyu menü, aramalı beyaz üst bar, IBM Plex Sans yazı tipi. Renkler ve ölçüler `src/index.css` içindeki `:root` değişkenlerinde.
+- **Renk kuralı:** Renk süs değil, anlam taşır. Gelen çağrı yeşil, giden çağrı mavi, ticket kehribar, teklif camgöbeği, uyarı kırmızı. Yeni bir ekranda bu eşleşmeyi bozmayın.
+- **Menü:** `src/config.js` içindeki `MENU` dizisi gruplardan oluşur. Yeni sayfa için ilgili gruba bir satır, `App.jsx` dosyasına bir rota ekleyin. Sayfa hazır değilse `soon: true` yazın; menüde "yakında" etiketi çıkar. İkon adları: https://icons.getbootstrap.com
+- **Hazır bileşenler** (yeni sayfada bunları kullanın, kendi kartınızı yazmayın):
+  - `<PageHeader title="Ticket Listesi" subtitle="42 kayıt">butonlar</PageHeader>`: sayfa başlığı
+  - `<Panel title="..." icon="..." color="green|blue|amber|teal|red" actions={...} flush>içerik</Panel>`: beyaz kart; `flush` tablolar için
+  - `<Pagination />`: sayfalama
+  - `utils/format.js`: `formatDuration(saniye)`, `todayIstanbul()`
+  - Durum etiketleri için `chip` sınıfı (ör. `<span className="chip chip-in">Gelen</span>`)
 
 ## 6. Güvenlik ve KVKK
 
@@ -73,6 +81,7 @@ Tarayıcı (React) ──/api/*──▶ Express ──▶ requireAuth ──▶
 | GET | `/api/customers/:id` ve `/api/customers/:id/timeline` | giriş yapmış |
 | POST, PATCH | `/api/customers[/:id]` | satis |
 | DELETE | `/api/customers/:id` | yonetim |
+| GET | `/api/dashboard/daily?date=YYYY-MM-DD` | giriş yapmış |
 | GET | `/api/health` | herkese açık |
 
-Sıradaki modüller: `interactions`, `offers`, `tickets` (+ mesajlar ve ekler), `imports` (CSV), `integrations` (API anahtarıyla sürekli aktarım), `dashboard`.
+Sıradaki modüller: `interactions`, `offers`, `tickets` (+ mesajlar ve ekler), `imports` (CSV), `integrations` (API anahtarıyla sürekli aktarım).

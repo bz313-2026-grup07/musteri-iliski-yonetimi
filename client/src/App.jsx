@@ -1,11 +1,19 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthContext';
 import ProtectedRoute from './auth/ProtectedRoute';
 import Layout from './components/Layout';
 import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 import Customers from './pages/Customers';
 import CustomerDetail from './pages/CustomerDetail';
 import Placeholder from './pages/Placeholder';
+
+// Üst bardaki aramadan /musteriler?q=... ile gelince liste yeni aramayla açılsın
+function CustomersRoute() {
+  const { search } = useLocation();
+  const q = new URLSearchParams(search).get('q') || '';
+  return <Customers key={search} initialQuery={q} />;
+}
 
 export default function App() {
   return (
@@ -16,20 +24,30 @@ export default function App() {
 
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
-              <Route index element={<Placeholder title="Gösterge Paneli" sprint="KT3 (günlük analiz)" />} />
-              <Route path="musteriler" element={<Customers />} />
+              <Route index element={<Dashboard />} />
+              <Route path="musteriler" element={<CustomersRoute />} />
               <Route path="musteriler/:id" element={<CustomerDetail />} />
-              <Route path="biletler" element={<Placeholder title="Destek Biletleri" sprint="KT2" />} />
-              <Route path="teklifler" element={<Placeholder title="Teklifler" sprint="KT3" />} />
+
+              {/* Sırada yazılacak sayfalar */}
+              <Route path="biletler" element={<Placeholder note="KT2 kapsamında geliştiriliyor." />} />
+              <Route path="teklifler" element={<Placeholder note="KT3 kapsamında geliştiriliyor." />} />
+
+              {/* Fizibilite dışı, eski platformda olan bölümler (menüde "yakında") */}
+              <Route path="bildirimler" element={<Placeholder />} />
+              <Route path="myd" element={<Placeholder />} />
+              <Route path="anketler" element={<Placeholder />} />
+              <Route path="sirket-ici-ticket" element={<Placeholder />} />
+              <Route path="hosting" element={<Placeholder />} />
+              <Route path="faturalar" element={<Placeholder />} />
 
               <Route element={<ProtectedRoute roles={['teknik']} />}>
-                <Route path="aktarim" element={<Placeholder title="Veri Aktarımı" sprint="KT3" />} />
+                <Route path="aktarim" element={<Placeholder note="KT3 kapsamında geliştiriliyor." />} />
               </Route>
               <Route element={<ProtectedRoute roles={[]} />}>
-                <Route path="kullanicilar" element={<Placeholder title="Kullanıcılar" sprint="KT2" />} />
+                <Route path="kullanicilar" element={<Placeholder note="KT2 kapsamında geliştiriliyor." />} />
               </Route>
 
-              <Route path="*" element={<Placeholder title="Sayfa bulunamadı" sprint="—" />} />
+              <Route path="*" element={<Placeholder />} />
             </Route>
           </Route>
         </Routes>

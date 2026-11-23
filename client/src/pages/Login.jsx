@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
 import { errorMessage } from '../api/client';
+import { APP_NAME, COMPANY_NAME } from '../config';
 
 export default function Login() {
   const { user, login } = useAuth();
@@ -28,33 +29,47 @@ export default function Login() {
   }
 
   return (
-    <main className="d-flex align-items-center justify-content-center min-vh-100 bg-light">
-      <form className="card shadow-sm p-4" style={{ width: '100%', maxWidth: 380 }} onSubmit={onSubmit} noValidate>
-        <h1 className="h4 mb-1">Rosebud CRM</h1>
-        <p className="text-muted small mb-4">PraSoft müşteri ilişkileri yönetimi</p>
-
-        {error && <div className="alert alert-danger py-2" role="alert">{error}</div>}
-
-        <div className="mb-3">
-          <label htmlFor="email" className="form-label">E-posta</label>
-          <input id="email" type="email" className="form-control" autoComplete="username" autoFocus required
-            value={email} onChange={(e) => setEmail(e.target.value)} />
+    <div className="login">
+      <aside className="login-side">
+        <div className="d-flex align-items-center gap-3">
+          <span className="brand-mark" aria-hidden="true">P</span>
+          <span className="brand-name">{APP_NAME}</span>
         </div>
-        <div className="mb-4">
-          <label htmlFor="password" className="form-label">Parola</label>
-          <input id="password" type="password" className="form-control" autoComplete="current-password" required
-            value={password} onChange={(e) => setPassword(e.target.value)} />
+        <div>
+          <h1>Müşteriler, çağrılar ve ticketlar tek yerde.</h1>
+          <p>Bir müşterinin bütün geçmişini, bugünün çağrı yoğunluğunu ve açık talepleri aynı ekrandan takip edin.</p>
         </div>
-        <button type="submit" className="btn btn-primary w-100" disabled={busy}>
-          {busy ? 'Giriş yapılıyor…' : 'Giriş yap'}
-        </button>
+        <small className="text-white-50">{COMPANY_NAME}</small>
+      </aside>
 
-        {import.meta.env.DEV && (
-          <p className="text-muted small mt-3 mb-0">
-            Geliştirme hesapları: yonetim@ / satis1@ / teknik@rosebud.test · Parola123!
-          </p>
-        )}
-      </form>
-    </main>
+      <main className="login-form-wrap">
+        <form className="login-form" onSubmit={onSubmit} noValidate>
+          <h2 className="h4 mb-1">Giriş yap</h2>
+          <p className="text-body-secondary mb-4">Şirket e-posta adresinizle devam edin.</p>
+
+          {error && <div className="alert alert-danger py-2" role="alert">{error}</div>}
+
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label">E-posta</label>
+            <input id="email" type="email" className="form-control form-control-lg" autoComplete="username" autoFocus required
+              value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="password" className="form-label">Parola</label>
+            <input id="password" type="password" className="form-control form-control-lg" autoComplete="current-password" required
+              value={password} onChange={(e) => setPassword(e.target.value)} />
+          </div>
+          <button type="submit" className="btn btn-primary btn-lg w-100" disabled={busy}>
+            {busy ? 'Giriş yapılıyor…' : 'Giriş yap'}
+          </button>
+
+          {import.meta.env.DEV && (
+            <p className="text-body-secondary small mt-4 mb-0">
+              Geliştirme hesapları: yonetim@, satis1@ veya teknik@rosebud.test, parola Parola123!
+            </p>
+          )}
+        </form>
+      </main>
+    </div>
   );
 }

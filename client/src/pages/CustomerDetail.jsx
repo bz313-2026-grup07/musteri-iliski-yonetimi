@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import api, { errorMessage } from '../api/client';
 import { useAuth } from '../auth/useAuth';
 import CustomerForm from '../components/CustomerForm';
+import Panel from '../components/Panel';
 
 const TYPE_META = {
   interaction: { label: 'Görüşme', cls: 'text-bg-primary' },
@@ -40,8 +41,8 @@ export default function CustomerDetail() {
 
       <div className="row g-4">
         <section className="col-lg-4" aria-labelledby="kart-baslik">
-          <div className="card">
-            <div className="card-body">
+          <div className="panel panel-blue">
+            <div className="panel-body">
               <div className="d-flex align-items-start">
                 <h1 id="kart-baslik" className="h4 me-auto">{customer.name}</h1>
                 {hasRole('satis') && (
@@ -68,8 +69,8 @@ export default function CustomerDetail() {
           </div>
         </section>
 
-        <section className="col-lg-8" aria-labelledby="gecmis-baslik">
-          <h2 id="gecmis-baslik" className="h5">İletişim geçmişi</h2>
+        <div className="col-lg-8">
+          <Panel title="İletişim geçmişi" icon="clock-history">
           {/* TODO (sprint): "Görüşme notu ekle", "Teklif oluştur", "Bilet aç" butonları buraya */}
           {timeline.length === 0 && <p className="text-muted">Henüz kayıt yok.</p>}
           <ol className="list-group">
@@ -78,14 +79,15 @@ export default function CustomerDetail() {
                 <div className="d-flex gap-2 align-items-center">
                   <span className={`badge ${TYPE_META[item.type].cls}`}>{TYPE_META[item.type].label}</span>
                   <strong className="me-auto">{item.title || item.subtype}</strong>
-                  <small className="text-muted">{fmt(item.at)}</small>
+                  <small className="text-body-secondary">{fmt(item.at)}</small>
                 </div>
                 {item.body && <div className="small mt-1">{item.body}</div>}
-                <div className="small text-muted">{item.subtype} · {item.user_name}</div>
+                <div className="small text-body-secondary">{item.subtype}, {item.user_name}</div>
               </li>
             ))}
           </ol>
-        </section>
+          </Panel>
+        </div>
       </div>
     </>
   );
