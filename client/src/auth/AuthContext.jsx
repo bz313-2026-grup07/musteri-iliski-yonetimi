@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import api, { tokenStore } from '../api/client';
 import { AuthContext } from './useAuth';
+import { ROLES } from '../constants';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(() => Boolean(tokenStore.get()));
 
-  // Sayfa yenilenince token varsa kullanıcıyı geri yükle
   useEffect(() => {
     if (!tokenStore.get()) return;
     api.get('/auth/me')
@@ -27,9 +27,8 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
-  /** hasRole('satis') -> yonetim her zaman true */
   const hasRole = useCallback(
-    (...roles) => Boolean(user) && (user.role === 'yonetim' || roles.includes(user.role)),
+    (...roles) => Boolean(user) && (user.role === ROLES.ADMIN || roles.includes(user.role)),
     [user],
   );
 

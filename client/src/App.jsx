@@ -7,8 +7,9 @@ import Dashboard from './pages/Dashboard';
 import Customers from './pages/Customers';
 import CustomerDetail from './pages/CustomerDetail';
 import Placeholder from './pages/Placeholder';
+import { ROLES } from './constants';
 
-// Üst bardaki aramadan /musteriler?q=... ile gelince liste yeni aramayla açılsın
+// Üst bardaki arama aynı sayfadayken de yeni sorguyla açılsın diye key olarak query string kullanılıyor.
 function CustomersRoute() {
   const { search } = useLocation();
   const q = new URLSearchParams(search).get('q') || '';
@@ -28,11 +29,9 @@ export default function App() {
               <Route path="musteriler" element={<CustomersRoute />} />
               <Route path="musteriler/:id" element={<CustomerDetail />} />
 
-              {/* Sırada yazılacak sayfalar */}
               <Route path="biletler" element={<Placeholder note="KT2 kapsamında geliştiriliyor." />} />
               <Route path="teklifler" element={<Placeholder note="KT3 kapsamında geliştiriliyor." />} />
 
-              {/* Fizibilite dışı, eski platformda olan bölümler (menüde "yakında") */}
               <Route path="bildirimler" element={<Placeholder />} />
               <Route path="myd" element={<Placeholder />} />
               <Route path="anketler" element={<Placeholder />} />
@@ -40,10 +39,10 @@ export default function App() {
               <Route path="hosting" element={<Placeholder />} />
               <Route path="faturalar" element={<Placeholder />} />
 
-              <Route element={<ProtectedRoute roles={['teknik']} />}>
+              <Route element={<ProtectedRoute roles={[ROLES.SUPPORT]} />}>
                 <Route path="aktarim" element={<Placeholder note="KT3 kapsamında geliştiriliyor." />} />
               </Route>
-              <Route element={<ProtectedRoute roles={[]} />}>
+              <Route element={<ProtectedRoute roles={[ROLES.ADMIN]} />}>
                 <Route path="kullanicilar" element={<Placeholder note="KT2 kapsamında geliştiriliyor." />} />
               </Route>
 

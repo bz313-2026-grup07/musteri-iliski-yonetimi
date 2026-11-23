@@ -16,7 +16,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Oturum düşerse girişe yönlendir
 api.interceptors.response.use(
   (res) => res,
   (err) => {
@@ -28,7 +27,6 @@ api.interceptors.response.use(
   },
 );
 
-/** Backend hata mesajını okunur hale getirir */
 export function errorMessage(err) {
   const data = err.response?.data;
   if (data?.details?.length) return `${data.error}: ${data.details.map((d) => d.message).join(', ')}`;

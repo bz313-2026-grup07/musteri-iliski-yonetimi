@@ -14,11 +14,9 @@ const config = {
   integrationApiKey: process.env.INTEGRATION_API_KEY,
 };
 
-if (!config.jwtSecret) {
-  throw new Error('JWT_SECRET tanımlı değil. server/.env dosyasını oluşturun (bkz. .env.example).');
-}
-if (!config.databaseUrl) {
-  throw new Error('DATABASE_URL tanımlı değil. server/.env dosyasını oluşturun (bkz. .env.example).');
+const required = { JWT_SECRET: config.jwtSecret, DATABASE_URL: config.databaseUrl };
+for (const [name, value] of Object.entries(required)) {
+  if (!value) throw new Error(`${name} tanımlı değil. server/.env dosyasını oluşturun (bkz. .env.example).`);
 }
 
 module.exports = config;

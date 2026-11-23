@@ -1,17 +1,15 @@
-/**
- * Müşteri listesi - REFERANS SAYFA
- * Ticket / teklif listeleri bu yapıyla yazılabilir: PageHeader + Panel(arama) + tablo + sayfalama.
- */
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api, { errorMessage } from '../api/client';
 import { useAuth } from '../auth/useAuth';
+import { ROLES } from '../constants';
 import Pagination from '../components/Pagination';
 import CustomerForm from '../components/CustomerForm';
 import PageHeader from '../components/PageHeader';
 import Panel from '../components/Panel';
 
 const PAGE_SIZE = 25;
+const SEARCH_DELAY_MS = 300;
 
 export default function Customers({ initialQuery = '' }) {
   const { hasRole } = useAuth();
@@ -24,10 +22,9 @@ export default function Customers({ initialQuery = '' }) {
   const [showForm, setShowForm] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
-  // Yazmayı bitirdikten 300 ms sonra ara
   useEffect(() => {
     if (q === debouncedQ) return undefined;
-    const t = setTimeout(() => { setDebouncedQ(q); setPage(1); }, 300);
+    const t = setTimeout(() => { setDebouncedQ(q); setPage(1); }, SEARCH_DELAY_MS);
     return () => clearTimeout(t);
   }, [q, debouncedQ]);
 
@@ -45,7 +42,7 @@ export default function Customers({ initialQuery = '' }) {
   return (
     <>
       <PageHeader title="Müşteriler" subtitle={loading ? 'Yükleniyor…' : `${total.toLocaleString('tr-TR')} kayıt`}>
-        {hasRole('satis') && (
+        {hasRole(ROLES.SALES) && (
           <button type="button" className="btn btn-primary" onClick={() => setShowForm((s) => !s)} aria-expanded={showForm}>
             <i className={`bi bi-${showForm ? 'x-lg' : 'plus-lg'} me-1`} aria-hidden="true" />
             {showForm ? 'Formu kapat' : 'Yeni müşteri'}

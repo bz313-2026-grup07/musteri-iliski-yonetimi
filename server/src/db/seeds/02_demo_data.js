@@ -1,12 +1,7 @@
-/**
- * Sahte (yapay) veri. Gerçek müşteri verisi KVKK onayı gelene kadar kullanılmaz (Fizibilite R-02).
- * Hacim .env'den: SEED_CUSTOMERS (varsayılan 2000), SEED_CALLS (varsayılan 10000).
- * Fizibilitedeki performans testi için: SEED_CUSTOMERS=16000 SEED_CALLS=50000 npm run seed
- *
- * Hız için veriler doğrudan SQL generate_series ile üretilir (16.000 kayıt birkaç saniye).
- */
+// Yapay demo verisi. Hacim için SEED_CUSTOMERS ve SEED_CALLS ortam değişkenlerine bakın.
+// Binlerce satırı hızlı üretmek için generate_series ve hashint4 kullanılıyor.
 exports.seed = async function seed(knex) {
-  if (process.env.NODE_ENV === 'test') return; // testler kendi verisini kurar
+  if (process.env.NODE_ENV === 'test') return;
 
   const nCustomers = Number(process.env.SEED_CUSTOMERS) || 2000;
   const nCalls = Number(process.env.SEED_CALLS) || 10000;
@@ -71,6 +66,10 @@ exports.seed = async function seed(knex) {
            (ARRAY['acik','cevap_bekleniyor','tamamlandi'])[1 + (c.id % 3)],
            now() - ((c.id % 30) || ' days')::interval
     FROM customers c WHERE c.id % 40 = 0
+  `);
+  await knex.raw(`
+    UPDATE tickets SET closed_at = created_at + interval '2 days', updated_at = created_at + interval '2 days'
+     WHERE status = 'tamamlandi'
   `);
   await knex.raw(`
     INSERT INTO ticket_messages (ticket_id, user_id, body, created_at)

@@ -1,7 +1,3 @@
-/**
- * Henüz yazılmamış sayfalar için yer tutucu.
- * Sayfa yazılınca App.jsx'teki rotayı gerçek bileşenle değiştirin ve config.js'te "soon" alanını silin.
- */
 import { useLocation } from 'react-router-dom';
 import { MENU_ITEMS } from '../config';
 import PageHeader from '../components/PageHeader';

@@ -11,7 +11,6 @@ const FIELDS = [
   ['city', 'Şehir', 'text', 'col-md-4'],
 ];
 
-/** Yeni müşteri (customer yoksa) veya düzenleme (customer verilirse) */
 export default function CustomerForm({ customer, onSaved }) {
   const [form, setForm] = useState(() => ({ ...EMPTY, ...pick(customer) }));
   const [error, setError] = useState('');

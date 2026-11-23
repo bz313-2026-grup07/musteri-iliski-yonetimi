@@ -1,16 +1,7 @@
-/**
- * Rosebud CRM - ilk şema
- * Fizibilite raporu 3.2 (kapsam içi) ve 5.1 (zorunlu gereksinimler) baz alınmıştır.
- *
- * Şema değişikliği gerekirse BU DOSYAYI DEĞİŞTİRMEYİN; yeni migration açın:
- *   npm run migrate:make -- ekleme_aciklamasi
- */
-
 exports.up = async function up(knex) {
-  // Müşteri adı / firma / e-posta / telefon üzerinde hızlı "içinde geçen" araması için
+  // ILIKE '%...%' aramalarının indeks kullanabilmesi için
   await knex.raw('CREATE EXTENSION IF NOT EXISTS pg_trgm');
 
-  // ---------------------------------------------------------------- users
   await knex.schema.createTable('users', (t) => {
     t.increments('id');
     t.string('full_name', 120).notNullable();
@@ -23,10 +14,9 @@ exports.up = async function up(knex) {
   });
   await knex.raw(`ALTER TABLE users ADD CONSTRAINT users_role_chk CHECK (role IN ('yonetim','satis','teknik'))`);
 
-  // ------------------------------------------------------------ customers
   await knex.schema.createTable('customers', (t) => {
     t.increments('id');
-    // Eski platformdaki kimlik. Yeniden aktarımda mükerrer kayıt oluşmaması için UNIQUE (Fizibilite 5.4 veri bütünlüğü)
+    // Eski sistemdeki kayıt numarası; aynı dosya tekrar aktarılınca kopya oluşmasın diye benzersiz.
     t.string('source_id', 64).unique();
     t.string('name', 160).notNullable(); // ad soyad / unvan
     t.string('company', 200);
@@ -43,7 +33,6 @@ exports.up = async function up(knex) {
   await knex.raw('CREATE INDEX customers_email_trgm ON customers USING gin (email gin_trgm_ops)');
   await knex.raw('CREATE INDEX customers_phone_trgm ON customers USING gin (phone gin_trgm_ops)');
 
-  // --------------------------------------------- interactions (görüşmeler)
   await knex.schema.createTable('interactions', (t) => {
     t.increments('id');
     t.integer('customer_id').notNullable().references('customers.id').onDelete('CASCADE');
@@ -61,7 +50,6 @@ exports.up = async function up(knex) {
   await knex.raw(`ALTER TABLE interactions ADD CONSTRAINT interactions_channel_chk CHECK (channel IN ('telefon','eposta','toplanti','diger'))`);
   await knex.raw(`ALTER TABLE interactions ADD CONSTRAINT interactions_direction_chk CHECK (direction IS NULL OR direction IN ('gelen','giden'))`);
 
-  // ----------------------------------------------------- offers (teklifler)
   await knex.schema.createTable('offers', (t) => {
     t.increments('id');
     t.integer('customer_id').notNullable().references('customers.id').onDelete('CASCADE');
@@ -78,7 +66,6 @@ exports.up = async function up(knex) {
   });
   await knex.raw(`ALTER TABLE offers ADD CONSTRAINT offers_status_chk CHECK (status IN ('hazirlandi','sunuldu','onaylandi','reddedildi'))`);
 
-  // ------------------------------------------------- tickets (destek biletleri)
   await knex.raw('CREATE SEQUENCE ticket_no_seq START 1');
   await knex.schema.createTable('tickets', (t) => {
     t.increments('id');
@@ -120,7 +107,6 @@ exports.up = async function up(knex) {
     t.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
   });
 
-  // --------------------------------------------- import_jobs / import_errors
   await knex.schema.createTable('import_jobs', (t) => {
     t.increments('id');
     t.string('type', 20).notNullable(); // customers / calls
@@ -145,7 +131,6 @@ exports.up = async function up(knex) {
     t.index(['job_id']);
   });
 
-  // ----------------------------------------------------- calls (çağrı verisi, CSV)
   await knex.schema.createTable('calls', (t) => {
     t.increments('id');
     t.string('external_id', 64).unique(); // CSV'de varsa: yeniden aktarımda tekrar etmesin
@@ -157,13 +142,11 @@ exports.up = async function up(knex) {
     t.string('phone', 40);
     t.integer('import_job_id').references('import_jobs.id').onDelete('SET NULL');
     t.timestamp('created_at', { useTz: true }).notNullable().defaultTo(knex.fn.now());
-    // Fizibilite 6.2 PoC: tarih ve temsilci indeksleri dashboard için yeterli bulundu
     t.index(['call_at']);
     t.index(['agent_id', 'call_at']);
   });
   await knex.raw(`ALTER TABLE calls ADD CONSTRAINT calls_direction_chk CHECK (direction IN ('gelen','giden'))`);
 
-  // ---------------------------------------------------------- audit_logs
   await knex.schema.createTable('audit_logs', (t) => {
     t.bigIncrements('id');
     t.integer('user_id').references('users.id').onDelete('SET NULL');

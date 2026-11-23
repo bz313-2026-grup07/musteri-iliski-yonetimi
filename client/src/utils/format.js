@@ -1,13 +1,28 @@
-/** Saniyeyi okunur süreye çevirir: 75 -> "1 dk 15 sn", 7380 -> "2 sa 3 dk" */
-export function formatDuration(sec) {
-  if (!sec) return '0 dk';
-  const h = Math.floor(sec / 3600);
-  const m = Math.floor((sec % 3600) / 60);
-  const s = sec % 60;
-  if (h) return `${h} sa ${m} dk`;
-  if (m) return `${m} dk${s ? ` ${s} sn` : ''}`;
-  return `${s} sn`;
+import { TIMEZONE } from '../constants';
+
+export function formatDuration(totalSeconds) {
+  if (!totalSeconds) return '0 dk';
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours) return `${hours} sa ${minutes} dk`;
+  if (minutes) return seconds ? `${minutes} dk ${seconds} sn` : `${minutes} dk`;
+  return `${seconds} sn`;
 }
 
-/** İstanbul saatine göre bugünün tarihi: "2026-11-23" */
-export const todayIstanbul = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Istanbul' });
+// sv-SE yereli tarihi doğrudan YYYY-MM-DD biçiminde verir.
+export const todayIstanbul = () => new Date().toLocaleDateString('sv-SE', { timeZone: TIMEZONE });
+
+export const currentHourIstanbul = () => Number(
+  new Date().toLocaleString('en-GB', { hour: '2-digit', hour12: false, timeZone: TIMEZONE }),
+);
+
+export const formatTime = (value) => new Date(value).toLocaleTimeString('tr-TR', {
+  hour: '2-digit', minute: '2-digit', timeZone: TIMEZONE,
+});
+
+export function formatLongDate(isoDate) {
+  return new Date(`${isoDate}T12:00:00`).toLocaleDateString('tr-TR', {
+    day: 'numeric', month: 'long', weekday: 'long',
+  });
+}

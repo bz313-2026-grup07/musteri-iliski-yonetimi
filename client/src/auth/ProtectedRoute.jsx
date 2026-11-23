@@ -1,10 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from './useAuth';
 
-/**
- * Oturum yoksa girişe yollar. roles verilirse rol kontrolü de yapar.
- * NOT: Bu yalnızca arayüz kolaylığıdır; asıl yetki kontrolü backend'dedir.
- */
+// Bu kontrol sadece arayüz içindir; asıl yetki kontrolü API tarafında yapılıyor.
 export default function ProtectedRoute({ roles }) {
   const { user, loading, hasRole } = useAuth();
   const location = useLocation();
