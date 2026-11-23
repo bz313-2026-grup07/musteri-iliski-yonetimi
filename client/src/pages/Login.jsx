@@ -12,7 +12,6 @@ export default function Login() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  // Giriş başarılı olunca user dolar ve kullanıcı geldiği sayfaya döner
   if (user) return <Navigate to={location.state?.from?.pathname || '/'} replace />;
 
   async function onSubmit(e) {

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api, { errorMessage } from '../api/client';
 import { useAuth } from '../auth/useAuth';
+import { ROLES } from '../constants';
 import CustomerForm from '../components/CustomerForm';
 import Panel from '../components/Panel';
 
@@ -45,7 +46,7 @@ export default function CustomerDetail() {
             <div className="panel-body">
               <div className="d-flex align-items-start">
                 <h1 id="kart-baslik" className="h4 me-auto">{customer.name}</h1>
-                {hasRole('satis') && (
+                {hasRole(ROLES.SALES) && (
                   <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => setEditing((e) => !e)}>
                     {editing ? 'Vazgeç' : 'Düzenle'}
                   </button>
@@ -71,7 +72,6 @@ export default function CustomerDetail() {
 
         <div className="col-lg-8">
           <Panel title="İletişim geçmişi" icon="clock-history">
-          {/* TODO (sprint): "Görüşme notu ekle", "Teklif oluştur", "Bilet aç" butonları buraya */}
           {timeline.length === 0 && <p className="text-muted">Henüz kayıt yok.</p>}
           <ol className="list-group">
             {timeline.map((item) => (

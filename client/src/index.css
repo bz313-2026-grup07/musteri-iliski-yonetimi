@@ -1,11 +1,4 @@
-/* =========================================================================
-   PRACRM teması
-   Eski platformun kimliği korunur (koyu menü, mor-mavi marka), ama:
-   - menü gruplu, üst bar beyaz ve aramalı
-   - renkler işin türünü anlatır: gelen çağrı yeşil, giden mavi, ticket kehribar,
-     teklif camgöbeği. Süs için renk kullanmayın.
-   Renk değiştirmek için yalnızca :root değişkenlerini düzenleyin.
-   ========================================================================= */
+/* Renk ve ölçüleri değiştirmek için :root değişkenlerini kullanın. */
 
 :root {
   /* zemin ve yazı */
@@ -58,7 +51,6 @@ h1, h2, h3 {
   letter-spacing: -0.01em;
 }
 
-/* Klavye ile gezinmede odak her zaman görünür (Fizibilite 5.4 erişilebilirlik) */
 :focus-visible {
   outline: 3px solid #7aa7f0;
   outline-offset: 2px;
@@ -87,7 +79,7 @@ main:focus {
   border-color: var(--line);
 }
 
-/* =================================================================== Menü */
+/* Menü */
 .sidebar {
   position: fixed;
   inset: 0 auto 0 0;
@@ -172,7 +164,6 @@ main:focus {
   background: var(--ink-hover);
   color: #fff;
 }
-/* eski platformdaki soldaki aktif çizgi */
 .menu-link.active::before {
   content: '';
   position: absolute;
@@ -242,7 +233,7 @@ main:focus {
   padding-top: 8px;
 }
 
-/* =================================================================== Üst bar */
+/* Üst bar */
 .main {
   margin-left: var(--sidebar-w);
   min-height: 100vh;
@@ -352,7 +343,7 @@ main:focus {
   color: var(--muted);
 }
 
-/* =================================================================== İçerik */
+/* İçerik */
 .content {
   flex: 1;
   padding: 24px;
@@ -445,7 +436,7 @@ main:focus {
 .chip-in { background: #e3f5ee; color: #0b7a55; }
 .chip-out { background: #e5eefc; color: #2459b3; }
 
-/* =================================================================== Günün Analizi: özet şeridi */
+/* Günün Analizi: özet şeridi */
 .today {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -612,7 +603,7 @@ main:focus {
   margin-top: 3px;
 }
 
-/* =================================================================== Giriş ekranı */
+/* Giriş ekranı */
 .login {
   min-height: 100vh;
   display: grid;
@@ -653,7 +644,7 @@ main:focus {
   max-width: 360px;
 }
 
-/* =================================================================== Mobil */
+/* Mobil */
 @media (max-width: 1199.98px) {
   .today {
     grid-template-columns: 1fr;

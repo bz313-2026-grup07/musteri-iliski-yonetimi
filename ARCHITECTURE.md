@@ -22,18 +22,22 @@ Tarayıcı (React) ──/api/*──▶ Express ──▶ requireAuth ──▶
 
 **Kural:** Yetki kontrolü **backend'de** yapılır. Arayüzde butonu gizlemek yalnızca kolaylıktır. Fizibilite 5.4, rol dışı isteklerin doğrudan API üzerinden de reddedildiğinin test edilmesini istiyor (bkz. `tests/auth.test.js`).
 
-## 3. Yeni backend modülü nasıl eklenir
+## 3. Backend modül yapısı
 
-`server/src/modules/customers/customers.routes.js` dosyasını kopyalayın ve şu sırayı izleyin:
+Her modül üç dosyadan oluşur. Örnek olarak `server/src/modules/tickets/` klasörüne bakın.
 
-1. `router.use(requireAuth)`
-2. Zod şeması tanımlayın, `const data = validate(schema, req.body)`
-3. Yazma işlemlerinde `requireRole('satis')` (veya ilgili rolü) kullanın
-4. Değişiklikten sonra `await audit(req.user.id, 'create', 'tablo', id)`
-5. Yanıt biçimi: tek kayıt için `{ data }`, liste için `{ data, meta: { page, pageSize, total } }`
-6. Hata fırlatmak için `throw notFound()`, `throw badRequest()` vb. kullanın. Express 5 async hataları kendisi yakalar, try/catch gerekmez.
-7. `src/app.js` dosyasında `app.use('/api/...', require(...))` satırını açın
-8. `tests/` altına en az şu testleri yazın: başarılı istek, doğrulama hatası (400), rol dışı istek (403)
+| Dosya | Sorumluluk | İçermez |
+|---|---|---|
+| `x.routes.js` | URL, yetki (`requireRole`), `validate`, `audit`, HTTP yanıtı | SQL, iş kuralı |
+| `x.service.js` | iş kuralları ve veritabanı sorguları; hata için `throw notFound()` vb. | `req`, `res` |
+| `x.schemas.js` | Zod doğrulama şemaları | iş mantığı |
+
+Kurallar:
+- Durum, kategori, rol gibi değerler `src/constants.js` içinden kullanılır; kodda `'acik'`, `'satis'` gibi düz metin yazılmaz.
+- Liste uç noktaları `getPagination` ve `paginate` (`utils/query.js`) kullanır; yanıt biçimi `{ data, meta: { page, pageSize, total } }`.
+- Express 5 async hataları kendisi yakalar; `try/catch` sadece hatayı gerçekten ele alacaksanız yazılır.
+- Yorumlar "ne" değil "neden" sorusunu yanıtlar. Kod zaten ne yaptığını söylüyorsa yorum yazmayın.
+- Yeni modülü `src/app.js` dosyasına bağlayın; `tests/` altına en az başarılı istek, 400 ve 403 testleri yazın.
 
 ## 4. Veritabanı
 
@@ -81,7 +85,13 @@ Tarayıcı (React) ──/api/*──▶ Express ──▶ requireAuth ──▶
 | GET | `/api/customers/:id` ve `/api/customers/:id/timeline` | giriş yapmış |
 | POST, PATCH | `/api/customers[/:id]` | satis |
 | DELETE | `/api/customers/:id` | yonetim |
+| GET | `/api/tickets?q=&customer=&user=&status=&category=&from=&to=&assignedTo=` | giriş yapmış |
+| GET | `/api/tickets/:id` (id veya `TKT-000012`) | giriş yapmış |
+| POST | `/api/tickets` | giriş yapmış (tüm roller) |
+| PATCH | `/api/tickets/:id` | teknik |
 | GET | `/api/dashboard/daily?date=YYYY-MM-DD` | giriş yapmış |
 | GET | `/api/health` | herkese açık |
 
-Sıradaki modüller: `interactions`, `offers`, `tickets` (+ mesajlar ve ekler), `imports` (CSV), `integrations` (API anahtarıyla sürekli aktarım).
+Ayrıntılı örnekler: `docs/api/biletler.md`
+
+Sıradaki modüller: `interactions`, `offers`, bilet mesajları ve ekleri (#15), `imports` (CSV), `integrations` (API anahtarıyla sürekli aktarım).

@@ -1,7 +1,4 @@
-/**
- * Geliştirme kullanıcıları. TÜM TABLOLARI TEMİZLER - yalnızca geliştirme/test içindir.
- * Parola (hepsi): Parola123!
- */
+// Tüm tabloları temizler; yalnızca geliştirme ve test ortamı içindir.
 const bcrypt = require('bcrypt');
 
 const DEV_PASSWORD = 'Parola123!';

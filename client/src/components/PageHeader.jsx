@@ -1,4 +1,3 @@
-/** Sayfa başlığı: solda başlık (+ isteğe bağlı alt satır), sağda butonlar/filtreler */
 export default function PageHeader({ title, subtitle, children }) {
   return (
     <div className="page-header">

@@ -1,18 +1,17 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const db = require('../db');
+const { ROLES } = require('../constants');
 const { unauthorized, forbidden } = require('../utils/httpError');
 
-const ROLES = Object.freeze({ YONETIM: 'yonetim', SATIS: 'satis', TEKNIK: 'teknik' });
+function readBearerToken(req) {
+  const [scheme, token] = (req.headers.authorization || '').split(' ');
+  return scheme === 'Bearer' ? token : null;
+}
 
-/**
- * Authorization: Bearer <token> başlığını doğrular, req.user'ı doldurur.
- * Kullanıcı pasifleştirildiyse token geçerli olsa bile reddeder.
- */
 async function requireAuth(req, _res, next) {
-  const header = req.headers.authorization || '';
-  const [scheme, token] = header.split(' ');
-  if (scheme !== 'Bearer' || !token) throw unauthorized();
+  const token = readBearerToken(req);
+  if (!token) throw unauthorized();
 
   let payload;
   try {
@@ -21,34 +20,32 @@ async function requireAuth(req, _res, next) {
     throw unauthorized('Oturum süresi dolmuş veya geçersiz');
   }
 
+  // Token hâlâ geçerli olsa bile pasifleştirilmiş kullanıcı içeri girmemeli.
   const user = await db('users')
     .select('id', 'full_name', 'email', 'role', 'is_active')
     .where({ id: payload.sub })
     .first();
-  if (!user || !user.is_active) throw unauthorized('Kullanıcı bulunamadı veya pasif');
+  if (!user?.is_active) throw unauthorized('Kullanıcı bulunamadı veya pasif');
 
   req.user = user;
   next();
 }
 
-/**
- * Rol kontrolü. 'yonetim' her zaman geçer.
- *   router.post('/', requireRole('satis'), handler)
- *   router.get('/', requireRole('satis', 'teknik'), handler)
- */
-function requireRole(...allowed) {
+function requireRole(...allowedRoles) {
   return (req, _res, next) => {
     if (!req.user) throw unauthorized();
-    if (req.user.role === ROLES.YONETIM || allowed.includes(req.user.role)) return next();
-    throw forbidden();
+    const isAllowed = req.user.role === ROLES.ADMIN || allowedRoles.includes(req.user.role);
+    if (!isAllowed) throw forbidden();
+    next();
   };
 }
 
-/** Eski platformdan sürekli aktarım için: X-API-Key başlığı */
 function requireApiKey(req, _res, next) {
   const key = req.headers['x-api-key'];
-  if (!config.integrationApiKey || key !== config.integrationApiKey) throw unauthorized('Geçersiz API anahtarı');
+  if (!config.integrationApiKey || key !== config.integrationApiKey) {
+    throw unauthorized('Geçersiz API anahtarı');
+  }
   next();
 }
 
-module.exports = { requireAuth, requireRole, requireApiKey, ROLES };
+module.exports = { requireAuth, requireRole, requireApiKey };

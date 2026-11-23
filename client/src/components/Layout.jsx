@@ -1,19 +1,14 @@
-/**
- * Ana yerleşim: gruplu koyu sol menü + üst bar (müşteri arama, bildirim, kullanıcı).
- * Menü içeriği src/config.js > MENU dizisinden gelir.
- */
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
 import { APP_NAME, COMPANY_NAME, MENU } from '../config';
-
-const ROLE_LABEL = { yonetim: 'Yönetim', satis: 'Satış', teknik: 'Teknik' };
+import { ROLE_LABELS } from '../constants';
 
 export default function Layout() {
   const { user, logout, hasRole } = useAuth();
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false); // masaüstü: dar menü
-  const [mobileOpen, setMobileOpen] = useState(false); // mobil: açılır menü
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [search, setSearch] = useState('');
 
   const groups = MENU
@@ -23,6 +18,10 @@ export default function Layout() {
   function toggleMenu() {
     if (window.matchMedia('(max-width: 991.98px)').matches) setMobileOpen((o) => !o);
     else setCollapsed((c) => !c);
+  }
+
+  function closeMenuOnLinkClick(event) {
+    if (event.target.closest('a')) setMobileOpen(false);
   }
 
   function onSearch(e) {
@@ -44,8 +43,7 @@ export default function Layout() {
           <span className="brand-name">{APP_NAME}</span>
         </NavLink>
 
-        {/* Mobilde bir bağlantıya tıklanınca menü kapansın */}
-        <nav className="menu" onClick={(e) => { if (e.target.closest('a')) setMobileOpen(false); }}>
+        <nav className="menu" onClick={closeMenuOnLinkClick}>
           {groups.map((g) => (
             <div className="menu-group" key={g.group}>
               <h2 className="menu-group-title">{g.group}</h2>
@@ -93,7 +91,7 @@ export default function Layout() {
                 <span className="avatar" aria-hidden="true">{initials}</span>
                 <span className="user-meta">
                   <span className="user-name">{user.fullName}</span>
-                  <span className="user-role">{ROLE_LABEL[user.role]}</span>
+                  <span className="user-role">{ROLE_LABELS[user.role]}</span>
                 </span>
                 <i className="bi bi-chevron-down small" aria-hidden="true" />
               </button>

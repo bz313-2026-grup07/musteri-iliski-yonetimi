@@ -1,8 +1,9 @@
 const config = require('../config');
 const { HttpError } = require('../utils/httpError');
 
-// Postgres hata kodları -> anlaşılır yanıt
-const PG_ERRORS = {
+const isProduction = config.env === 'production';
+
+const POSTGRES_ERRORS = {
   23505: [409, 'Bu değer zaten kayıtlı (benzersiz alan)'],
   23503: [400, 'İlişkili kayıt bulunamadı'],
   23514: [400, 'Geçersiz değer (izin verilen seçeneklerden biri değil)'],
@@ -17,9 +18,9 @@ function errorHandler(err, req, res, _next) {
   if (err instanceof HttpError) {
     return res.status(err.status).json({ error: err.message, details: err.details });
   }
-  if (err.code && PG_ERRORS[err.code]) {
-    const [status, message] = PG_ERRORS[err.code];
-    return res.status(status).json({ error: message, details: config.env !== 'production' ? err.detail : undefined });
+  if (err.code && POSTGRES_ERRORS[err.code]) {
+    const [status, message] = POSTGRES_ERRORS[err.code];
+    return res.status(status).json({ error: message, details: isProduction ? undefined : err.detail });
   }
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({ error: 'Geçersiz JSON' });
@@ -31,7 +32,7 @@ function errorHandler(err, req, res, _next) {
   console.error(err);
   return res.status(500).json({
     error: 'Sunucu hatası',
-    details: config.env !== 'production' ? err.message : undefined,
+    details: isProduction ? undefined : err.message,
   });
 }
 

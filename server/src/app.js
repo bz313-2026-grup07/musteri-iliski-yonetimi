@@ -18,16 +18,10 @@ app.get('/api/health', async (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-// ---- Modüller ----------------------------------------------------------
-// Yeni modülü buraya ekleyin (ör. app.use('/api/tickets', require('./modules/tickets/tickets.routes')))
 app.use('/api/auth', require('./modules/auth/auth.routes'));
 app.use('/api/users', require('./modules/users/users.routes'));
 app.use('/api/customers', require('./modules/customers/customers.routes'));
-// app.use('/api/interactions', ...)   -> Sprint: görüşme notları
-// app.use('/api/offers', ...)         -> Sprint: teklifler
-// app.use('/api/tickets', ...)        -> Sprint: destek biletleri
-// app.use('/api/imports', ...)        -> Sprint: CSV / toplu aktarım
-// app.use('/api/integrations', ...)   -> Sprint: sürekli aktarım (requireApiKey)
+app.use('/api/tickets', require('./modules/tickets/tickets.routes'));
 app.use('/api/dashboard', require('./modules/dashboard/dashboard.routes'));
 
 app.use(notFoundHandler);

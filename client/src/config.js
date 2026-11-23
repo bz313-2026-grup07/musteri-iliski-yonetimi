@@ -1,16 +1,8 @@
-/** Uygulama geneli sabitler */
+import { ROLES } from './constants';
+
 export const APP_NAME = 'PRACRM';
 export const COMPANY_NAME = 'Prasoft Yazılım';
 
-/**
- * Sol menü - gruplar ve sayfalar.
- * - icon : Bootstrap Icons adı (https://icons.getbootstrap.com)
- * - tone : ikon rengi; işin türünü gösterir (calls | customers | tickets | offers | finance | system)
- * - roles: yoksa herkes görür; [] = yalnızca yonetim; ['teknik'] = teknik + yonetim
- * - soon : true ise sayfa henüz yazılmadı, menüde "yakında" etiketi çıkar
- *
- * Yeni sayfa ekleyince: buraya bir satır + App.jsx'e bir rota.
- */
 export const MENU = [
   {
     group: 'Genel',
@@ -45,11 +37,10 @@ export const MENU = [
   {
     group: 'Yönetim',
     items: [
-      { to: '/kullanicilar', label: 'Kullanıcılar', icon: 'people', tone: 'system', roles: [] },
-      { to: '/aktarim', label: 'Veri Aktarımı', icon: 'cloud-arrow-up', tone: 'system', roles: ['teknik'] },
+      { to: '/kullanicilar', label: 'Kullanıcılar', icon: 'people', tone: 'system', roles: [ROLES.ADMIN] },
+      { to: '/aktarim', label: 'Veri Aktarımı', icon: 'cloud-arrow-up', tone: 'system', roles: [ROLES.SUPPORT] },
     ],
   },
 ];
 
-/** Menüdeki tüm sayfalar düz liste halinde (rota ve başlık eşleştirmek için) */
 export const MENU_ITEMS = MENU.flatMap((g) => g.items);
