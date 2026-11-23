@@ -58,8 +58,8 @@ exports.seed = async function seed(knex) {
            'Demo kapsam açıklaması',
            (5000 + (c.id * 137) % 45000)::numeric,
            (now() - ((c.id % 60) || ' days')::interval)::date,
-           (ARRAY['hazirlandi','sunuldu','onaylandi','reddedildi'])[1 + (c.id % 4)]
-    FROM customers c WHERE c.id % 5 = 0
+           (ARRAY['hazirlandi','sunuldu','onaylandi','reddedildi'])[1 + ((c.id / 20) % 4)]
+    FROM customers c WHERE c.id % 20 = 0
   `);
 
   // Biletler + ilk mesaj
@@ -70,21 +70,30 @@ exports.seed = async function seed(knex) {
            (ARRAY['teknik_destek','talep','proje'])[1 + (c.id % 3)],
            (ARRAY['acik','cevap_bekleniyor','tamamlandi'])[1 + (c.id % 3)],
            now() - ((c.id % 30) || ' days')::interval
-    FROM customers c WHERE c.id % 8 = 0
+    FROM customers c WHERE c.id % 40 = 0
   `);
   await knex.raw(`
     INSERT INTO ticket_messages (ticket_id, user_id, body, created_at)
     SELECT t.id, 4, 'Müşteri talebi alındı, inceleniyor.', t.created_at FROM tickets t
   `);
 
-  // Çağrılar: son 30 gün, temsilciler 2,3,4
+  // Çağrılar: son 180 güne yayılır, İstanbul saatiyle 08-18 arası, öğlene doğru yoğunlaşır.
+  // Gelecekteki saatler atlanır (bugünün grafiği "şu ana kadar" görünür).
   await knex.raw(`
     INSERT INTO calls (call_at, direction, duration_sec, agent_id, customer_id)
-    SELECT date_trunc('day', now()) - ((g % 30) || ' days')::interval + ((8 * 3600 + (g * 37) % 36000) || ' seconds')::interval,
-           (ARRAY['gelen','giden'])[1 + (g % 2)],
-           15 + (g * 53) % 1200,
-           2 + (g % 3),
-           1 + (g % ?)
-    FROM generate_series(1, ?) AS g
+    SELECT ts, dir, dur, agent, cust FROM (
+      SELECT
+        ((date_trunc('day', now() AT TIME ZONE 'Europe/Istanbul') - ((h.a % 180) || ' days')::interval
+          + interval '8 hours' + (((h.b % 600 + h.c % 600) / 2) || ' minutes')::interval
+          + ((h.d % 60) || ' seconds')::interval) AT TIME ZONE 'Europe/Istanbul') AS ts,
+        CASE WHEN h.e % 100 < 62 THEN 'gelen' ELSE 'giden' END AS dir,
+        15 + (h.b % 420) + CASE WHEN h.c % 10 = 0 THEN h.d % 900 ELSE 0 END AS dur,
+        (ARRAY[2, 3, 4])[1 + h.c % 3] AS agent,
+        1 + h.d % ? AS cust
+      FROM generate_series(1, ?) AS g,
+      LATERAL (SELECT abs(hashint4(g + 5000011)) a, abs(hashint4(g + 6000011)) b, abs(hashint4(g + 7000003)) c,
+                      abs(hashint4(g + 8000009)) d, abs(hashint4(g + 9000011)) e) h
+    ) x
+    WHERE ts <= now()
   `, [nCustomers, nCalls]);
 };

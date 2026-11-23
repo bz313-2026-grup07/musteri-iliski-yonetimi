@@ -1,49 +1,119 @@
-import { NavLink, Outlet } from 'react-router-dom';
+/**
+ * Ana yerleşim: gruplu koyu sol menü + üst bar (müşteri arama, bildirim, kullanıcı).
+ * Menü içeriği src/config.js > MENU dizisinden gelir.
+ */
+import { useState } from 'react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
+import { APP_NAME, COMPANY_NAME, MENU } from '../config';
 
 const ROLE_LABEL = { yonetim: 'Yönetim', satis: 'Satış', teknik: 'Teknik' };
 
-// Menü: yeni sayfa eklenince buraya bir satır ekleyin
-const NAV = [
-  { to: '/', label: 'Gösterge Paneli', end: true },
-  { to: '/musteriler', label: 'Müşteriler' },
-  { to: '/biletler', label: 'Destek Biletleri' },
-  { to: '/teklifler', label: 'Teklifler' },
-  { to: '/aktarim', label: 'Veri Aktarımı', roles: ['teknik'] },
-  { to: '/kullanicilar', label: 'Kullanıcılar', roles: [] }, // yalnızca yonetim
-];
-
 export default function Layout() {
   const { user, logout, hasRole } = useAuth();
+  const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(false); // masaüstü: dar menü
+  const [mobileOpen, setMobileOpen] = useState(false); // mobil: açılır menü
+  const [search, setSearch] = useState('');
+
+  const groups = MENU
+    .map((g) => ({ ...g, items: g.items.filter((i) => !i.roles || hasRole(...i.roles)) }))
+    .filter((g) => g.items.length > 0);
+
+  function toggleMenu() {
+    if (window.matchMedia('(max-width: 991.98px)').matches) setMobileOpen((o) => !o);
+    else setCollapsed((c) => !c);
+  }
+
+  function onSearch(e) {
+    e.preventDefault();
+    const q = search.trim();
+    navigate(q ? `/musteriler?q=${encodeURIComponent(q)}` : '/musteriler');
+    setSearch('');
+  }
+
+  const initials = user.fullName.split(' ').map((p) => p[0]).slice(0, 2).join('');
 
   return (
-    <>
-      <a href="#main" className="visually-hidden-focusable btn btn-light position-absolute m-2">İçeriğe geç</a>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark" aria-label="Ana menü">
-        <div className="container-fluid">
-          <NavLink className="navbar-brand fw-semibold" to="/">Rosebud CRM</NavLink>
-          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
-            aria-controls="nav" aria-expanded="false" aria-label="Menüyü aç/kapat">
-            <span className="navbar-toggler-icon" />
+    <div className={`app${collapsed ? ' is-collapsed' : ''}${mobileOpen ? ' is-menu-open' : ''}`}>
+      <a href="#main" className="visually-hidden-focusable skip-link">İçeriğe geç</a>
+
+      <aside className="sidebar" aria-label="Ana menü">
+        <NavLink to="/" className="brand" aria-label={`${APP_NAME} ana sayfa`}>
+          <span className="brand-mark" aria-hidden="true">P</span>
+          <span className="brand-name">{APP_NAME}</span>
+        </NavLink>
+
+        {/* Mobilde bir bağlantıya tıklanınca menü kapansın */}
+        <nav className="menu" onClick={(e) => { if (e.target.closest('a')) setMobileOpen(false); }}>
+          {groups.map((g) => (
+            <div className="menu-group" key={g.group}>
+              <h2 className="menu-group-title">{g.group}</h2>
+              <ul>
+                {g.items.map((item) => (
+                  <li key={item.to}>
+                    <NavLink to={item.to} end={item.end} className="menu-link" title={item.label}>
+                      <i className={`bi bi-${item.icon} tone-${item.tone}`} aria-hidden="true" />
+                      <span className="menu-label">{item.label}</span>
+                      {item.soon && <span className="menu-soon">yakında</span>}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
+
+        <div className="sidebar-foot">{COMPANY_NAME}</div>
+      </aside>
+
+      {mobileOpen && <div className="backdrop" onClick={() => setMobileOpen(false)} aria-hidden="true" />}
+
+      <div className="main">
+        <header className="topbar">
+          <button type="button" className="icon-btn" onClick={toggleMenu} aria-label="Menüyü aç veya kapat">
+            <i className="bi bi-list" aria-hidden="true" />
           </button>
-          <div className="collapse navbar-collapse" id="nav">
-            <ul className="navbar-nav me-auto">
-              {NAV.filter((n) => !n.roles || hasRole(...n.roles)).map((n) => (
-                <li className="nav-item" key={n.to}>
-                  <NavLink className="nav-link" to={n.to} end={n.end}>{n.label}</NavLink>
+
+          <form className="topbar-search" role="search" onSubmit={onSearch}>
+            <i className="bi bi-search" aria-hidden="true" />
+            <label htmlFor="global-search" className="visually-hidden">Müşteri ara</label>
+            <input id="global-search" type="search" placeholder="Müşteri ara: ad, firma, telefon…"
+              value={search} onChange={(e) => setSearch(e.target.value)} />
+          </form>
+
+          <div className="topbar-end">
+            <NavLink to="/bildirimler" className="icon-btn" title="Bildirimler">
+              <i className="bi bi-bell" aria-hidden="true" />
+              <span className="visually-hidden">Bildirimler</span>
+            </NavLink>
+
+            <div className="dropdown">
+              <button type="button" className="user-btn" data-bs-toggle="dropdown" aria-expanded="false">
+                <span className="avatar" aria-hidden="true">{initials}</span>
+                <span className="user-meta">
+                  <span className="user-name">{user.fullName}</span>
+                  <span className="user-role">{ROLE_LABEL[user.role]}</span>
+                </span>
+                <i className="bi bi-chevron-down small" aria-hidden="true" />
+              </button>
+              <ul className="dropdown-menu dropdown-menu-end">
+                <li><span className="dropdown-item-text small text-body-secondary">{user.email}</span></li>
+                <li><hr className="dropdown-divider" /></li>
+                <li>
+                  <button type="button" className="dropdown-item" onClick={logout}>
+                    <i className="bi bi-box-arrow-right me-2" aria-hidden="true" />Çıkış yap
+                  </button>
                 </li>
-              ))}
-            </ul>
-            <span className="navbar-text text-light me-3 small">
-              {user.fullName} · <span className="badge text-bg-secondary">{ROLE_LABEL[user.role]}</span>
-            </span>
-            <button type="button" className="btn btn-outline-light btn-sm" onClick={logout}>Çıkış</button>
+              </ul>
+            </div>
           </div>
-        </div>
-      </nav>
-      <main id="main" className="container-fluid py-4" tabIndex={-1}>
-        <Outlet />
-      </main>
-    </>
+        </header>
+
+        <main id="main" className="content" tabIndex={-1}>
+          <Outlet />
+        </main>
+      </div>
+    </div>
   );
 }

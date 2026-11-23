@@ -28,7 +28,7 @@ app.use('/api/customers', require('./modules/customers/customers.routes'));
 // app.use('/api/tickets', ...)        -> Sprint: destek biletleri
 // app.use('/api/imports', ...)        -> Sprint: CSV / toplu aktarım
 // app.use('/api/integrations', ...)   -> Sprint: sürekli aktarım (requireApiKey)
-// app.use('/api/dashboard', ...)      -> Sprint: günlük analiz paneli
+app.use('/api/dashboard', require('./modules/dashboard/dashboard.routes'));
 
 app.use(notFoundHandler);
 app.use(errorHandler);
